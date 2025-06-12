@@ -1,0 +1,13 @@
+package com.gustavoluz.spendwise_api;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpendwiseApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpendwiseApiApplication.class, args);
+	}
+
+}
