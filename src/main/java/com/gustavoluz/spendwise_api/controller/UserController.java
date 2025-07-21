@@ -6,6 +6,7 @@ import com.gustavoluz.spendwise_api.dto.user.UserResponseDto;
 import com.gustavoluz.spendwise_api.entity.User;
 import com.gustavoluz.spendwise_api.mapper.UserMapper;
 import com.gustavoluz.spendwise_api.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> create(@RequestBody @Valid UserRequestDto dto) {
 
         User user = userMapper.toEntity(dto);
         User created = userService.create(user);
@@ -34,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDto>> getAll() {
 
         List<UserResponseDto> users = userService
                 .findAll()
@@ -53,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<UserResponseDto> getById(@PathVariable UUID id) {
 
         User user = userService.findById(id);
         return ResponseEntity.ok(userMapper.toDto(user));
@@ -61,7 +62,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/name")
-    public ResponseEntity<UserResponseDto> updateUserName(@PathVariable UUID id, @RequestBody String name) {
+    public ResponseEntity<UserResponseDto> updateName(@PathVariable UUID id, @RequestBody String name) {
 
         User updated = userService.updateName(id, name);
         return ResponseEntity.ok(userMapper.toDto(updated));
@@ -69,7 +70,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/email")
-    public ResponseEntity<UserResponseDto> updateUserEmail(@PathVariable UUID id, @RequestBody String email) {
+    public ResponseEntity<UserResponseDto> updateEmail(@PathVariable UUID id, @RequestBody String email) {
 
         User updated = userService.updateEmail(id, email);
         return ResponseEntity.ok(userMapper.toDto(updated));
@@ -77,7 +78,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
 
         userService.delete(id);
         return ResponseEntity.noContent().build();
@@ -94,5 +95,13 @@ public class UserController {
 
 
         return ResponseEntity.ok(token);
+    }
+
+    @GetMapping("/authenticated")
+    public ResponseEntity<UserResponseDto> getAuthenticated(HttpServletRequest request) {
+        return ResponseEntity
+                .ok(userMapper
+                        .toDto(userService
+                                .getAuthenticated(request)));
     }
 }

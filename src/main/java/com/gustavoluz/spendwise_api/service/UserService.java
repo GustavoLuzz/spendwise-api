@@ -5,6 +5,7 @@ import com.gustavoluz.spendwise_api.entity.User;
 import com.gustavoluz.spendwise_api.exception.ResourceAlreadyExistsException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;
 import com.gustavoluz.spendwise_api.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,13 +57,8 @@ public class UserService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token =  jwtTokenManager.generateToken(authentication);
-
-
-
-        return token;
+        return jwtTokenManager.generateToken(authentication);
     }
-
 
     public List<User> findAll() {
         return repository.findAll();
@@ -82,6 +78,17 @@ public class UserService {
         return repository.save(user);
     }
 
+    public User getAuthenticated(HttpServletRequest request) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = auth.getName();
+
+        return repository
+                .findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
     public User updateEmail(UUID id, String email) {
 
         User user = findById(id);
@@ -95,7 +102,6 @@ public class UserService {
     }
 
     // need the password update method
-
 
     public void delete(UUID id) {
 
