@@ -53,10 +53,10 @@ public class AuthFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenManager.getUsernameFromToken(jwtToken);
             } catch (ExpiredJwtException exception) {
-                LOGGER.info("[FALHA AUTENTICACAO] - Token expirado, usuario: {} - {}",
+                LOGGER.info("[AUTHENTICATION FAIL] - Expired token, user: {} - {}",
                         exception.getClaims().getSubject(), exception.getMessage());
 
-                LOGGER.trace("[FALHA AUTENTICACAO] - stack trace: %s", exception);
+                LOGGER.trace("[AUTHENTICATION FAIL] - stack trace: %s", exception);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
         }
