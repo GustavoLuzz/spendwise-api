@@ -20,8 +20,10 @@ public class Category {
     private UUID id;
 
     private String name;
-
     private CategoryType type;
+
+    @Column(nullable = false)
+    private Boolean isGlobal = false;
 
     @ManyToOne
     private User user;
