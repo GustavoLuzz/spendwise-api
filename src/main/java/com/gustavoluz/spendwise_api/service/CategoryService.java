@@ -53,6 +53,13 @@ public class CategoryService {
         return repository.findAllByUser(user);
     }
 
+    public List<Category> findAllByType(HttpServletRequest request, CategoryType type) {
+
+        User user = userService.getAuthenticated(request);
+
+        return repository.findAllByType(type);
+    }
+
     public Category findById(UUID id) {
         return repository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException(

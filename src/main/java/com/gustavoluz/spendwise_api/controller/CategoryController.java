@@ -57,6 +57,23 @@ public class CategoryController {
 
     }
 
+    @GetMapping("/type")
+    public ResponseEntity<List<CategoryResponseDto>> findAllByType(
+            HttpServletRequest request, @RequestParam CategoryType type) {
+
+        List<Category> categories = service.findAllByType(request, type);
+
+        if(categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.
+                ok(categories
+                        .stream()
+                        .map(categoryMapper::toDto)
+                        .toList());
+    }
+
     @GetMapping("/user")
     public ResponseEntity<List<CategoryResponseDto>> findAllByUser(HttpServletRequest request) {
 
