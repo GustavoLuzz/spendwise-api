@@ -1,6 +1,6 @@
 package com.gustavoluz.spendwise_api.service;
 
-import com.gustavoluz.spendwise_api.config.JwtTokenManager;
+import com.gustavoluz.spendwise_api.config.security.JwtTokenManager;
 import com.gustavoluz.spendwise_api.entity.User;
 import com.gustavoluz.spendwise_api.exception.ResourceAlreadyExistsException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;

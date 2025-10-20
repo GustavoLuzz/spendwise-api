@@ -1,4 +1,4 @@
-package com.gustavoluz.spendwise_api.config;
+package com.gustavoluz.spendwise_api.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
