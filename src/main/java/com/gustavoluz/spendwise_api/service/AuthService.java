@@ -31,6 +31,6 @@ public class AuthService implements UserDetailsService {
 
         User user = optUser.get();
 
-        return new DetailedUserDto(user.getId(),user.getName(), user.getEmail(), user.getPassword());
+        return new DetailedUserDto(user.getId(),user.getName(), user.getEmail(), user.getPassword(), user.getRole());
     }
 }

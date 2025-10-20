@@ -1,4 +1,4 @@
-package com.gustavoluz.spendwise_api.config;
+package com.gustavoluz.spendwise_api.config.security;
 
 import com.gustavoluz.spendwise_api.service.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
