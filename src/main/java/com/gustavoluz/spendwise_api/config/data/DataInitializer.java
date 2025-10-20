@@ -25,15 +25,15 @@ public class DataInitializer implements CommandLineRunner {
 
     private void createGlobalCategories() {
         List<Category> globals = Arrays.asList(
-                createCategory("Alimentação", CategoryType.EXPENSE),
-                createCategory("Transporte", CategoryType.EXPENSE),
-                createCategory("Moradia", CategoryType.EXPENSE),
-                createCategory("Lazer", CategoryType.EXPENSE),
-                createCategory("Saúde", CategoryType.EXPENSE),
-                createCategory("Educação", CategoryType.EXPENSE),
-                createCategory("Salário", CategoryType.INCOME),
+                createCategory("Food", CategoryType.EXPENSE),
+                createCategory("Transport", CategoryType.EXPENSE),
+                createCategory("Housing", CategoryType.EXPENSE),
+                createCategory("Leisure", CategoryType.EXPENSE),
+                createCategory("Health", CategoryType.EXPENSE),
+                createCategory("Education", CategoryType.EXPENSE),
+                createCategory("Salary", CategoryType.INCOME),
                 createCategory("Freelance", CategoryType.INCOME),
-                createCategory("Investimentos", CategoryType.INCOME)
+                createCategory("Investments", CategoryType.INCOME)
         );
 
         categoryRepository.saveAll(globals);
