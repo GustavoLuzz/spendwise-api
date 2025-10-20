@@ -3,6 +3,7 @@ package com.gustavoluz.spendwise_api.service;
 import com.gustavoluz.spendwise_api.entity.Category;
 import com.gustavoluz.spendwise_api.entity.User;
 import com.gustavoluz.spendwise_api.entity.enums.CategoryType;
+import com.gustavoluz.spendwise_api.exception.BadRequestException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;
 import com.gustavoluz.spendwise_api.repository.CategoryRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +28,25 @@ public class CategoryService {
         return repository.save(category);
     }
 
+    public Category createGlobal(Category category) {
+        category.setUser(null);
+        category.setIsGlobal(true);
+        return repository.save(category);
+    }
+
     public List<Category> findAll(HttpServletRequest request) {
+
+        User user = userService.getAuthenticated(request);
+
+        List<Category> globalCategories = repository.findAllByIsGlobalTrue();
+        List<Category> userCategories = repository.findAllByUser(user);
+
+        globalCategories.addAll(userCategories);
+
+        return globalCategories;
+    }
+
+    public List<Category> findAllByUser(HttpServletRequest request) {
 
         User user = userService.getAuthenticated(request);
 
@@ -58,6 +77,11 @@ public class CategoryService {
     }
 
     public void delete(UUID id) {
+        Category category = findById(id);
+
+        if (Boolean.TRUE.equals(category.getIsGlobal())) {
+            throw new BadRequestException("Cannot delete global category");
+        }
 
         if(!repository.existsById(id)) {
             throw new ResourceNotFoundException("Category with id " + id + " not found");

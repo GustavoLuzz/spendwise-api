@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,12 @@ public class CategoryController {
         return ResponseEntity.ok(categoryMapper.toDto(service.create(category, request)));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/global")
+    public Category createGlobal(@RequestBody Category category) {
+        return service.createGlobal(category);
+    }
+
     @GetMapping
     public ResponseEntity<List<CategoryResponseDto>> findAll(HttpServletRequest request) {
 
@@ -47,6 +54,23 @@ public class CategoryController {
                 .stream()
                 .map(categoryMapper::toDto)
                 .toList());
+
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<CategoryResponseDto>> findAllByUser(HttpServletRequest request) {
+
+        List<Category> categories = service.findAllByUser(request);
+
+        if(categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.
+                ok(categories
+                        .stream()
+                        .map(categoryMapper::toDto)
+                        .toList());
 
     }
 
