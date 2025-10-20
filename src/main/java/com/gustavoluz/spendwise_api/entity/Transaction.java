@@ -3,6 +3,8 @@ package com.gustavoluz.spendwise_api.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,11 +21,16 @@ public class Transaction {
 
     private BigDecimal amount;
     private String description;
-    private LocalDateTime date;
 
     @ManyToOne
     private Category category;
 
     @ManyToOne
     private User user;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
