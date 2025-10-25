@@ -60,31 +60,31 @@ public class CategoryService {
         return repository.findAllByType(type);
     }
 
-    public Category findById(UUID id) {
+    public Category findById(UUID id, HttpServletRequest request) {
         return repository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException(
                         "Category with id " + id + " not found"));
     }
 
-    public Category updateName(UUID id, String name) {
+    public Category updateName(UUID id, String name, HttpServletRequest request) {
 
-        Category category = findById(id);
+        Category category = findById(id, request);
 
         category.setName(name);
         return repository.save(category);
     }
 
-    public Category updateType(UUID id, CategoryType type) {
+    public Category updateType(UUID id, CategoryType type, HttpServletRequest request) {
 
-        Category category = findById(id);
+        Category category = findById(id, request);
 
         category.setType(type);
         return repository.save(category);
 
     }
 
-    public void delete(UUID id) {
-        Category category = findById(id);
+    public void delete(UUID id, HttpServletRequest request) {
+        Category category = findById(id, request);
 
         if (Boolean.TRUE.equals(category.getIsGlobal())) {
             throw new BadRequestException("Cannot delete global category");

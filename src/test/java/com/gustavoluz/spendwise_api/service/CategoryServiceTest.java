@@ -89,7 +89,7 @@ class CategoryServiceTest {
     void findByIdShouldReturnCategoryWhenExists() {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        Category found = categoryService.findById(categoryId);
+        Category found = categoryService.findById(categoryId, request);
 
         assertEquals(category, found);
     }
@@ -99,7 +99,7 @@ class CategoryServiceTest {
     void findByIdShouldThrowWhenNotFound() {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.findById(categoryId));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.findById(categoryId, request));
     }
 
     @Test
@@ -109,7 +109,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Category updated = categoryService.updateName(categoryId, newName);
+        Category updated = categoryService.updateName(categoryId, newName, request);
 
         assertEquals(newName, updated.getName());
         verify(categoryRepository).save(category);
@@ -122,7 +122,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Category updated = categoryService.updateType(categoryId, newType);
+        Category updated = categoryService.updateType(categoryId, newType, request);
 
         assertEquals(newType, updated.getType());
         verify(categoryRepository).save(category);
@@ -134,7 +134,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.existsById(categoryId)).thenReturn(true);
 
-        categoryService.delete(categoryId);
+        categoryService.delete(categoryId, request);
 
         verify(categoryRepository).deleteById(categoryId);
     }
@@ -145,7 +145,7 @@ class CategoryServiceTest {
         category.setIsGlobal(true);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        assertThrows(BadRequestException.class, () -> categoryService.delete(categoryId));
+        assertThrows(BadRequestException.class, () -> categoryService.delete(categoryId, request));
         verify(categoryRepository, never()).deleteById(any());
     }
 
@@ -155,7 +155,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.existsById(categoryId)).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(categoryId));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(categoryId, request));
         verify(categoryRepository, never()).deleteById(any());
     }
 }

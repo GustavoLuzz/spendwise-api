@@ -2,7 +2,7 @@ package com.gustavoluz.spendwise_api.controller;
 
 import com.gustavoluz.spendwise_api.dto.transaction.TransactionRequestDto;
 import com.gustavoluz.spendwise_api.dto.transaction.TransactionResponseDto;
-import com.gustavoluz.spendwise_api.entity.Category;
+import com.gustavoluz.spendwise_api.dto.transaction.TransactionUpdateDto;
 import com.gustavoluz.spendwise_api.entity.Transaction;
 import com.gustavoluz.spendwise_api.mapper.TransactionMapper;
 import com.gustavoluz.spendwise_api.service.TransactionService;
@@ -29,12 +29,7 @@ public class TransactionController {
             HttpServletRequest request
     ) {
         Transaction transaction = mapper.toEntity(dto);
-        if (dto.getCategoryId() != null) {
-            Category category = new Category();
-            category.setId(dto.getCategoryId());
-            transaction.setCategory(category);
-        }
-        Transaction created = service.create(transaction, request);
+        Transaction created = service.create(transaction, dto.categoryId(), request);
         return ResponseEntity.ok(mapper.toDto(created));
     }
 
@@ -62,11 +57,11 @@ public class TransactionController {
     @PatchMapping("/{id}")
     public ResponseEntity<TransactionResponseDto> update(
             @PathVariable UUID id,
-            @RequestBody TransactionRequestDto dto,
+            @RequestBody TransactionUpdateDto dto,
             HttpServletRequest request
     ) {
-        Transaction transactionDetails = mapper.toEntity(dto);
-        Transaction updated = service.update(id, transactionDetails, request);
+        Transaction transaction = mapper.toEntity(dto);
+        Transaction updated = service.update(id, transaction, request);
         return ResponseEntity.ok(mapper.toDto(updated));
     }
 

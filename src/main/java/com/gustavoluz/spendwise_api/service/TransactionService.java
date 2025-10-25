@@ -20,14 +20,12 @@ public class TransactionService {
     private final CategoryService categoryService;
     private final TransactionRepository repository;
 
-    public Transaction create(Transaction transaction, HttpServletRequest request) {
+    public Transaction create(Transaction transaction, UUID categoryId, HttpServletRequest request) {
         User user = userService.getAuthenticated(request);
         transaction.setUser(user);
 
-        if (transaction.getCategory() != null) {
-            Category category = categoryService.findById(transaction.getCategory().getId());
-            transaction.setCategory(category);
-        }
+        Category category = categoryService.findById(categoryId, request);
+        transaction.setCategory(category);
 
         return repository.save(transaction);
     }
@@ -53,7 +51,7 @@ public class TransactionService {
             transaction.setAmount(transactionDetails.getAmount());
         }
         if (transactionDetails.getCategory() != null) {
-            Category category = categoryService.findById(transactionDetails.getCategory().getId());
+            Category category = categoryService.findById(transactionDetails.getCategory().getId(), request);
             transaction.setCategory(category);
         }
 

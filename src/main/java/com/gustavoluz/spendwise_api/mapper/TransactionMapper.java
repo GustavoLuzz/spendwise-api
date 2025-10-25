@@ -2,6 +2,7 @@ package com.gustavoluz.spendwise_api.mapper;
 
 import com.gustavoluz.spendwise_api.dto.transaction.TransactionRequestDto;
 import com.gustavoluz.spendwise_api.dto.transaction.TransactionResponseDto;
+import com.gustavoluz.spendwise_api.dto.transaction.TransactionUpdateDto;
 import com.gustavoluz.spendwise_api.entity.Transaction;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,4 +18,6 @@ public interface TransactionMapper {
 
     @Mapping(target = "categoryId", source = "category.id")
     TransactionResponseDto toDto(Transaction entity);
+
+    Transaction toEntity(TransactionUpdateDto dto);
 }

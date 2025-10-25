@@ -92,31 +92,31 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponseDto> findById(@PathVariable UUID id) {
+    public ResponseEntity<CategoryResponseDto> findById(@PathVariable UUID id, HttpServletRequest request) {
 
         return ResponseEntity
                 .ok(categoryMapper
                         .toDto(service
-                                .findById(id)));
+                                .findById(id, request)));
 
     }
 
     @PatchMapping("/{id}/name")
-    public ResponseEntity<CategoryResponseDto> updateName(@PathVariable UUID id, @RequestParam String name) {
-        Category updated = service.updateName(id, name);
+    public ResponseEntity<CategoryResponseDto> updateName(@PathVariable UUID id, @RequestParam String name, HttpServletRequest request) {
+        Category updated = service.updateName(id, name, request);
         return ResponseEntity.ok(categoryMapper.toDto(updated));
     }
 
     @PatchMapping("/{id}/type")
-    public ResponseEntity<CategoryResponseDto> updateType(@PathVariable UUID id, @RequestParam CategoryType type) {
-        Category updated = service.updateType(id, type);
+    public ResponseEntity<CategoryResponseDto> updateType(@PathVariable UUID id, @RequestParam CategoryType type, HttpServletRequest request) {
+        Category updated = service.updateType(id, type, request);
         return ResponseEntity.ok(categoryMapper.toDto(updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id){
+    public ResponseEntity<Void> delete(@PathVariable UUID id, HttpServletRequest request){
 
-        service.delete(id);
+        service.delete(id, request);
         return ResponseEntity.noContent().build();
 
     }
