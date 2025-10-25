@@ -2,11 +2,13 @@ package com.gustavoluz.spendwise_api.dto.transaction;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
-public class TransactionRequestDto {
-    private String description;
-    private BigDecimal amount;
-    private UUID categoryId;
-}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public record TransactionRequestDto(
+    @NotBlank String description,
+    @Positive BigDecimal amount,
+    @NotNull UUID categoryId
+) {}
