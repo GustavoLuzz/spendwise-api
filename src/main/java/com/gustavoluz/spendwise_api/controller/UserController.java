@@ -10,10 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,17 +29,13 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponseDto> create(@RequestBody @Valid UserRequestDto dto) {
-
         User user = userMapper.toEntity(dto);
         User created = userService.create(user);
-
         return ResponseEntity.ok(userMapper.toDto(created));
-
     }
 
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAll() {
-
         List<UserResponseDto> users = userService
                 .findAll()
                 .stream()
@@ -44,64 +43,77 @@ public class UserController {
                 .toList();
 
         if(users.isEmpty()) {
-            return ResponseEntity
-                    .noContent()
-                    .build();
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(users);
-
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getById(@PathVariable UUID id) {
-
         User user = userService.findById(id);
         return ResponseEntity.ok(userMapper.toDto(user));
-
     }
 
     @PatchMapping("/{id}/name")
     public ResponseEntity<UserResponseDto> updateName(@PathVariable UUID id, @RequestBody String name) {
-
         User updated = userService.updateName(id, name);
         return ResponseEntity.ok(userMapper.toDto(updated));
-
     }
 
     @PatchMapping("/{id}/email")
     public ResponseEntity<UserResponseDto> updateEmail(@PathVariable UUID id, @RequestBody String email) {
-
         User updated = userService.updateEmail(id, email);
         return ResponseEntity.ok(userMapper.toDto(updated));
-
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-
         userService.delete(id);
         return ResponseEntity.noContent().build();
-
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public ResponseEntity<Map<String, String>> login(
             @RequestBody UserLoginDto dto, HttpServletResponse response) {
 
         User user = userMapper.toEntity(dto);
-
         String token = userService.authenticate(user, response);
 
+        ResponseCookie cookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
 
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(Map.of("message", "Login successful"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout() {
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(Map.of("message", "Logout successful"));
     }
 
     @GetMapping("/authenticated")
     public ResponseEntity<UserResponseDto> getAuthenticated(HttpServletRequest request) {
-        return ResponseEntity
-                .ok(userMapper
-                        .toDto(userService
-                                .getAuthenticated(request)));
+        return ResponseEntity.ok(
+                userMapper.toDto(
+                        userService.getAuthenticated(request)
+                )
+        );
     }
 }
