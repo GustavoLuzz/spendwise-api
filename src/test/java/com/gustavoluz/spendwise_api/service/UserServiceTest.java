@@ -42,20 +42,21 @@ class UserServiceTest {
     @Test
     @DisplayName("Create should save user with encrypted password when email not registered")
     void createShouldSaveUserWithEncryptedPasswordWhenEmailNotRegistered() {
-        when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCase(user.getEmail())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User created = userService.create(user);
 
         assertNotEquals("plainPassword", created.getPassword());
         assertTrue(new BCryptPasswordEncoder().matches("plainPassword", created.getPassword()));
+        assertEquals("test@example.com", created.getEmail());
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     @DisplayName("Create should throw when email already registered")
     void createShouldThrowWhenEmailAlreadyRegistered() {
-        when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCase(user.getEmail())).thenReturn(true);
 
         assertThrows(ResourceAlreadyExistsException.class, () -> userService.create(user));
         verify(userRepository, never()).save(any());
@@ -108,7 +109,7 @@ class UserServiceTest {
     void updateEmailShouldUpdateAndReturnUserWhenEmailNotUsed() {
         String newEmail = "new@example.com";
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByEmailAndIdNot(newEmail, userId)).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot(newEmail, userId)).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User updated = userService.updateEmail(userId, newEmail);
@@ -122,7 +123,7 @@ class UserServiceTest {
     void updateEmailShouldThrowWhenEmailAlreadyUsed() {
         String newEmail = "used@example.com";
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByEmailAndIdNot(newEmail, userId)).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot(newEmail, userId)).thenReturn(true);
 
         assertThrows(ResourceAlreadyExistsException.class, () -> userService.updateEmail(userId, newEmail));
         verify(userRepository, never()).save(any());

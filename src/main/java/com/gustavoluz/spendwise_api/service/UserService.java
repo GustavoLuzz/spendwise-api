@@ -29,7 +29,7 @@ public class UserService {
 
     public User create(User user) {
 
-        boolean isEmailRegistered = repository.existsByEmail(user.getEmail());
+        boolean isEmailRegistered = repository.existsByEmailIgnoreCase(user.getEmail());
 
         if(isEmailRegistered) {
             throw new ResourceAlreadyExistsException("Email already registered");
@@ -50,7 +50,7 @@ public class UserService {
 
 
 
-        repository.findByEmail(user.getEmail())
+        repository.findByEmailIgnoreCase(user.getEmail())
                 .orElseThrow(
                         () -> new ResponseStatusException(404, "Email do usuário não cadastrado", null)
                 );
@@ -85,7 +85,7 @@ public class UserService {
         String email = auth.getName();
 
         return repository
-                .findByEmail(email)
+                .findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
@@ -93,7 +93,7 @@ public class UserService {
 
         User user = findById(id);
 
-        if(repository.existsByEmailAndIdNot(email, id)) {
+        if(repository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
             throw new ResourceAlreadyExistsException("Email already registered");
         }
 

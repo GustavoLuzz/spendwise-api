@@ -22,7 +22,7 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Optional<User> optUser = repository.findByEmail(username);
+        Optional<User> optUser = repository.findByEmailIgnoreCase(username);
 
         if (optUser.isEmpty()) {
 
