@@ -13,12 +13,16 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "name"})
+)
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private String name;
     private CategoryType type;
 

@@ -4,6 +4,7 @@ import com.gustavoluz.spendwise_api.entity.Category;
 import com.gustavoluz.spendwise_api.entity.User;
 import com.gustavoluz.spendwise_api.entity.enums.CategoryType;
 import com.gustavoluz.spendwise_api.exception.BadRequestException;
+import com.gustavoluz.spendwise_api.exception.ResourceAlreadyExistsException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;
 import com.gustavoluz.spendwise_api.repository.CategoryRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +47,7 @@ class CategoryServiceTest {
     @DisplayName("Create should save category with user from request")
     void createShouldSaveCategoryWithUserFromRequest() {
         when(userService.getAuthenticated(request)).thenReturn(user);
+        when(categoryRepository.existsByNameIgnoreCaseAndUser(category.getName(), user)).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Category created = categoryService.create(category, request);
@@ -59,6 +61,7 @@ class CategoryServiceTest {
     void createGlobalShouldSaveCategoryWithIsGlobalTrueAndNoUser() {
         category.setUser(user);
         category.setIsGlobal(false);
+        when(categoryRepository.existsByNameIgnoreCaseAndIsGlobalTrue(category.getName())).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Category created = categoryService.createGlobal(category);
@@ -107,6 +110,7 @@ class CategoryServiceTest {
     void updateNameShouldUpdateAndReturnCategory() {
         String newName = "New Category";
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameIgnoreCaseAndUserAndIdNot(newName, user, categoryId)).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Category updated = categoryService.updateName(categoryId, newName, request);
@@ -126,6 +130,16 @@ class CategoryServiceTest {
 
         assertEquals(newType, updated.getType());
         verify(categoryRepository).save(category);
+    }
+
+    @Test
+    @DisplayName("Create should throw when category name already exists for user")
+    void createShouldThrowWhenCategoryNameAlreadyExistsForUser() {
+        when(userService.getAuthenticated(request)).thenReturn(user);
+        when(categoryRepository.existsByNameIgnoreCaseAndUser(category.getName(), user)).thenReturn(true);
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> categoryService.create(category, request));
+        verify(categoryRepository, never()).save(any());
     }
 
     @Test

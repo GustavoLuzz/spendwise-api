@@ -13,6 +13,14 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     List<Category> findAllByIsGlobalTrue();
 
     List<Category> findAllByUser(User user);
-    
+
     List<Category> findAllByType(CategoryType type);
+
+    boolean existsByNameIgnoreCaseAndUser(String name, User user);
+
+    boolean existsByNameIgnoreCaseAndUserAndIdNot(String name, User user, UUID id);
+
+    boolean existsByNameIgnoreCaseAndIsGlobalTrue(String name);
+
+    boolean existsByNameIgnoreCaseAndIsGlobalTrueAndIdNot(String name, UUID id);
 }
