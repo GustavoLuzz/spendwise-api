@@ -4,15 +4,19 @@ import com.gustavoluz.spendwise_api.dto.transaction.TransactionRequestDto;
 import com.gustavoluz.spendwise_api.dto.transaction.TransactionResponseDto;
 import com.gustavoluz.spendwise_api.dto.transaction.TransactionUpdateDto;
 import com.gustavoluz.spendwise_api.entity.Transaction;
+import com.gustavoluz.spendwise_api.entity.enums.CategoryType;
 import com.gustavoluz.spendwise_api.mapper.TransactionMapper;
 import com.gustavoluz.spendwise_api.service.TransactionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Sort;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -34,15 +38,16 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionResponseDto>> findAll(HttpServletRequest request) {
-        List<Transaction> transactions = service.findAll(request);
-        if (transactions.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        List<TransactionResponseDto> dtos = transactions.stream()
-                .map(mapper::toDto)
-                .toList();
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<Page<TransactionResponseDto>> findAll(
+            HttpServletRequest request,
+            @RequestParam(required = false) String period,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) CategoryType categoryType,
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<Transaction> transactions = service.findAll(request, period, categoryId, categoryType, search, pageable);
+        return ResponseEntity.ok(transactions.map(mapper::toDto));
     }
 
     @GetMapping("/{id}")

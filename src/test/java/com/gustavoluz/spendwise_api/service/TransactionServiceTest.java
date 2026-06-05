@@ -9,6 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -79,6 +85,32 @@ class TransactionServiceTest {
     }
 
     @Test
+    @DisplayName("Paged findAll should apply filters and return page")
+    void pagedFindAllShouldApplyFiltersAndReturnPage() {
+        when(userService.getAuthenticated(request)).thenReturn(user);
+        when(transactionRepository.findAll(
+                ArgumentMatchers.<Specification<Transaction>>any(),
+                ArgumentMatchers.<Pageable>any()
+        )).thenReturn(new PageImpl<>(List.of(transaction)));
+
+        Page<Transaction> result = transactionService.findAll(
+                request,
+                "month",
+                category.getId(),
+                null,
+                "test",
+                PageRequest.of(0, 10)
+        );
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(transaction, result.getContent().get(0));
+        verify(transactionRepository).findAll(
+                ArgumentMatchers.<Specification<Transaction>>any(),
+                ArgumentMatchers.<Pageable>any()
+        );
+    }
+
+    @Test
     @DisplayName("FindById should return transaction for user")
     void findByIdShouldReturnTransactionForUser() {
         when(userService.getAuthenticated(request)).thenReturn(user);
@@ -139,4 +171,3 @@ class TransactionServiceTest {
         verify(transactionRepository).delete(transaction);
     }
 }
-
