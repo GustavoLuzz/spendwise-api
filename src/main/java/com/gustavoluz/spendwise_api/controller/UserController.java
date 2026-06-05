@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> create(@RequestBody @Valid UserRequestDto dto) {
         User user = userMapper.toEntity(dto);
         User created = userService.create(user);
-        return ResponseEntity.ok(userMapper.toDto(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(created));
     }
 
     @GetMapping
@@ -90,7 +91,11 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(Map.of("message", "Login successful"));
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(Map.of(
+                        "token", token,
+                        "tokenType", "Bearer"
+                ));
     }
 
     @PostMapping("/logout")
