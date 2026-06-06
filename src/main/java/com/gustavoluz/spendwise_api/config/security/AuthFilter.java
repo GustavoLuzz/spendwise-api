@@ -1,13 +1,15 @@
 package com.gustavoluz.spendwise_api.config.security;
 
 import com.gustavoluz.spendwise_api.service.AuthService;
-import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,12 +54,10 @@ public class AuthFilter extends OncePerRequestFilter {
         if (jwtToken != null) {
             try {
                 username = jwtTokenManager.getUsernameFromToken(jwtToken);
-            } catch (ExpiredJwtException exception) {
-                LOGGER.info("[AUTHENTICATION FAIL] - Expired token, user: {} - {}",
-                        exception.getClaims().getSubject(), exception.getMessage());
-
-                LOGGER.trace("[AUTHENTICATION FAIL] - stack trace: %s", exception);
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            } catch (JwtException | IllegalArgumentException exception) {
+                LOGGER.info("[AUTHENTICATION FAIL] - Invalid or expired token");
+                LOGGER.debug("[AUTHENTICATION FAIL] - Token validation error", exception);
+                clearTokenCookie(response);
             }
         }
 
@@ -67,6 +67,18 @@ public class AuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void clearTokenCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void addUsernameInContext(HttpServletRequest request, String username, String jwtToken) {

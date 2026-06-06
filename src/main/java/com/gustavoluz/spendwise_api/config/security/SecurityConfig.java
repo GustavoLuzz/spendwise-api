@@ -38,6 +38,12 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers(
+                                "/api/public/**",
+                                "/api/public/authenticate"
+                        ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -45,13 +51,10 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/configuration/ui",
                                 "/configuration/security",
-                                "/api/public/**",
-                                "/api/public/authenticate",
                                 "/webjars/**",
                                 "/v3/api-docs/**",
-                                "/actuator/*"
-                        ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
+                                "/actuator/**"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(authEntryPoint))
