@@ -180,6 +180,11 @@ build/
 .vscode/
 .github/
 
+### Environment variables ###
+.env
+.env.*
+!.env.example
+
 ### Some additional ignores (sort later)
 *.DS_Store
 *.sw?
