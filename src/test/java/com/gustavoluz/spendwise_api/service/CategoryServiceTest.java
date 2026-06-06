@@ -7,6 +7,7 @@ import com.gustavoluz.spendwise_api.exception.BadRequestException;
 import com.gustavoluz.spendwise_api.exception.ResourceAlreadyExistsException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;
 import com.gustavoluz.spendwise_api.repository.CategoryRepository;
+import com.gustavoluz.spendwise_api.repository.TransactionRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.*;
 class CategoryServiceTest {
 
     private CategoryRepository categoryRepository;
+    private TransactionRepository transactionRepository;
     private UserService userService;
     private CategoryService categoryService;
     private HttpServletRequest request;
@@ -31,8 +33,9 @@ class CategoryServiceTest {
     @BeforeEach
     void setUp() {
         categoryRepository = mock(CategoryRepository.class);
+        transactionRepository = mock(TransactionRepository.class);
         userService = mock(UserService.class);
-        categoryService = new CategoryService(categoryRepository, userService);
+        categoryService = new CategoryService(categoryRepository, transactionRepository, userService);
         request = mock(HttpServletRequest.class);
 
         user.setId(UUID.randomUUID());
@@ -90,6 +93,7 @@ class CategoryServiceTest {
     @Test
     @DisplayName("Find by id should return category when exists")
     void findByIdShouldReturnCategoryWhenExists() {
+        when(userService.getAuthenticated(request)).thenReturn(user);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
         Category found = categoryService.findById(categoryId, request);
@@ -100,6 +104,7 @@ class CategoryServiceTest {
     @Test
     @DisplayName("Find by id should throw when not found")
     void findByIdShouldThrowWhenNotFound() {
+        when(userService.getAuthenticated(request)).thenReturn(user);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> categoryService.findById(categoryId, request));
@@ -109,6 +114,7 @@ class CategoryServiceTest {
     @DisplayName("Update name should update and return category")
     void updateNameShouldUpdateAndReturnCategory() {
         String newName = "New Category";
+        when(userService.getAuthenticated(request)).thenReturn(user);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.existsByNameIgnoreCaseAndUserAndIdNot(newName, user, categoryId)).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -123,6 +129,7 @@ class CategoryServiceTest {
     @DisplayName("Update type should update and return category")
     void updateTypeShouldUpdateAndReturnCategory() {
         CategoryType newType = CategoryType.INCOME;
+        when(userService.getAuthenticated(request)).thenReturn(user);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -145,31 +152,74 @@ class CategoryServiceTest {
     @Test
     @DisplayName("Delete should delete when category is not global and exists")
     void deleteShouldDeleteWhenCategoryIsNotGlobalAndExists() {
+        when(userService.getAuthenticated(request)).thenReturn(user);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(categoryRepository.existsById(categoryId)).thenReturn(true);
+        when(transactionRepository.existsByCategoryId(categoryId)).thenReturn(false);
 
         categoryService.delete(categoryId, request);
 
-        verify(categoryRepository).deleteById(categoryId);
+        verify(categoryRepository).delete(category);
     }
 
     @Test
     @DisplayName("Delete should throw when category is global")
     void deleteShouldThrowWhenCategoryIsGlobal() {
         category.setIsGlobal(true);
+        when(userService.getAuthenticated(request)).thenReturn(user);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
         assertThrows(BadRequestException.class, () -> categoryService.delete(categoryId, request));
-        verify(categoryRepository, never()).deleteById(any());
+        verify(categoryRepository, never()).delete(any());
     }
 
     @Test
     @DisplayName("Delete should throw when category not found")
     void deleteShouldThrowWhenCategoryNotFound() {
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(categoryRepository.existsById(categoryId)).thenReturn(false);
+        when(userService.getAuthenticated(request)).thenReturn(user);
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(categoryId, request));
-        verify(categoryRepository, never()).deleteById(any());
+        verify(categoryRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Delete should reject category with linked transactions")
+    void deleteShouldRejectCategoryWithLinkedTransactions() {
+        when(userService.getAuthenticated(request)).thenReturn(user);
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        when(transactionRepository.existsByCategoryId(categoryId)).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> categoryService.delete(categoryId, request));
+        verify(categoryRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Update should reject global category")
+    void updateShouldRejectGlobalCategory() {
+        category.setIsGlobal(true);
+        when(userService.getAuthenticated(request)).thenReturn(user);
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        assertThrows(
+                BadRequestException.class,
+                () -> categoryService.updateName(categoryId, "Updated Category", request)
+        );
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Find by id should reject category from another user")
+    void findByIdShouldRejectCategoryFromAnotherUser() {
+        User anotherUser = new User();
+        anotherUser.setId(UUID.randomUUID());
+        category.setUser(anotherUser);
+
+        when(userService.getAuthenticated(request)).thenReturn(user);
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> categoryService.findById(categoryId, request)
+        );
     }
 }

@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID>, JpaSpecificationExecutor<Transaction> {
     List<Transaction> findByUserId(UUID userId);
     Optional<Transaction> findByIdAndUserId(UUID id, UUID userId);
+    boolean existsByCategoryId(UUID categoryId);
 }
