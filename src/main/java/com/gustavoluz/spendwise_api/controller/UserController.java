@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(created));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAll() {
         List<UserResponseDto> users = userService
@@ -50,24 +52,28 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getById(@PathVariable UUID id) {
         User user = userService.findById(id);
         return ResponseEntity.ok(userMapper.toDto(user));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @PatchMapping("/{id}/name")
     public ResponseEntity<UserResponseDto> updateName(@PathVariable UUID id, @RequestBody String name) {
         User updated = userService.updateName(id, name);
         return ResponseEntity.ok(userMapper.toDto(updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @PatchMapping("/{id}/email")
     public ResponseEntity<UserResponseDto> updateEmail(@PathVariable UUID id, @RequestBody String email) {
         User updated = userService.updateEmail(id, email);
         return ResponseEntity.ok(userMapper.toDto(updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         userService.delete(id);

@@ -1,7 +1,9 @@
 package com.gustavoluz.spendwise_api.service;
 
 import com.gustavoluz.spendwise_api.config.security.JwtTokenManager;
+import com.gustavoluz.spendwise_api.dto.user.DetailedUserDto;
 import com.gustavoluz.spendwise_api.entity.User;
+import com.gustavoluz.spendwise_api.entity.enums.UserRole;
 import com.gustavoluz.spendwise_api.exception.ResourceAlreadyExistsException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;
 import com.gustavoluz.spendwise_api.repository.UserRepository;
@@ -10,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -61,10 +64,16 @@ public class UserService {
     }
 
     public List<User> findAll() {
+        ensureAdmin();
         return repository.findAll();
     }
 
     public User findById(UUID id) {
+        ensureCanAccess(id);
+        return findByIdInternal(id);
+    }
+
+    private User findByIdInternal(UUID id) {
         return repository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User with id " + id + " not found")
         );
@@ -72,7 +81,8 @@ public class UserService {
 
     public User updateName(UUID id, String name) {
 
-        User user = findById(id);
+        ensureCanAccess(id);
+        User user = findByIdInternal(id);
         user.setName(name);
 
         return repository.save(user);
@@ -91,7 +101,8 @@ public class UserService {
 
     public User updateEmail(UUID id, String email) {
 
-        User user = findById(id);
+        ensureCanAccess(id);
+        User user = findByIdInternal(id);
 
         if(repository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
             throw new ResourceAlreadyExistsException("Email already registered");
@@ -105,6 +116,7 @@ public class UserService {
 
     public void delete(UUID id) {
 
+        ensureCanAccess(id);
         if(!repository.existsById(id)) {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
@@ -113,9 +125,31 @@ public class UserService {
 
     }
 
+    private void ensureAdmin() {
+        if (getAuthenticatedPrincipal().role() != UserRole.ADMIN) {
+            throw new AccessDeniedException("Administrator access required");
+        }
+    }
 
+    private void ensureCanAccess(UUID userId) {
+        DetailedUserDto principal = getAuthenticatedPrincipal();
+        boolean isAdmin = principal.role() == UserRole.ADMIN;
+        boolean isOwner = principal.id().equals(userId);
 
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("Access denied");
+        }
+    }
 
+    private DetailedUserDto getAuthenticatedPrincipal() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof DetailedUserDto principal)) {
+            throw new AccessDeniedException("Authentication required");
+        }
 
+        return principal;
+    }
 }

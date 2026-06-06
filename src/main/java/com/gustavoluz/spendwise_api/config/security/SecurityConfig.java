@@ -4,6 +4,7 @@ import com.gustavoluz.spendwise_api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -48,10 +49,9 @@ public class SecurityConfig {
                                 "/api/public/authenticate",
                                 "/webjars/**",
                                 "/v3/api-docs/**",
-                                "/actuator/*",
-                                "/users",
-                                "/users/login"
+                                "/actuator/*"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(authEntryPoint))
