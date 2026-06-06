@@ -1,14 +1,19 @@
 package com.gustavoluz.spendwise_api.service;
 
 import com.gustavoluz.spendwise_api.config.security.JwtTokenManager;
+import com.gustavoluz.spendwise_api.dto.user.DetailedUserDto;
 import com.gustavoluz.spendwise_api.entity.User;
+import com.gustavoluz.spendwise_api.entity.enums.UserRole;
 import com.gustavoluz.spendwise_api.exception.ResourceAlreadyExistsException;
 import com.gustavoluz.spendwise_api.exception.ResourceNotFoundException;
 import com.gustavoluz.spendwise_api.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
@@ -37,6 +42,13 @@ class UserServiceTest {
         user.setEmail("test@example.com");
         user.setName("Test User");
         user.setPassword("plainPassword");
+        user.setRole(UserRole.REGULAR);
+        authenticateAs(userId, UserRole.REGULAR);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -65,6 +77,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Find all should return user list")
     void findAllShouldReturnUserList() {
+        authenticateAs(UUID.randomUUID(), UserRole.ADMIN);
         List<User> users = List.of(user);
         when(userRepository.findAll()).thenReturn(users);
 
@@ -146,5 +159,23 @@ class UserServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> userService.delete(userId));
         verify(userRepository, never()).deleteById(any());
+    }
+
+    private void authenticateAs(UUID id, UserRole role) {
+        DetailedUserDto principal = new DetailedUserDto(
+                id,
+                "Authenticated User",
+                "authenticated@example.com",
+                "password",
+                role
+        );
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        principal,
+                        null,
+                        principal.getAuthorities()
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
