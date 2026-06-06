@@ -62,7 +62,7 @@ public class TransactionController {
     @PatchMapping("/{id}")
     public ResponseEntity<TransactionResponseDto> update(
             @PathVariable UUID id,
-            @RequestBody TransactionUpdateDto dto,
+            @RequestBody @Valid TransactionUpdateDto dto,
             HttpServletRequest request
     ) {
         Transaction transaction = mapper.toEntity(dto);
