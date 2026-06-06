@@ -178,7 +178,6 @@ build/
 
 ### VS Code ###
 .vscode/
-.github/
 
 ### Environment variables ###
 .env
