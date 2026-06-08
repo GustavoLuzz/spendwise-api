@@ -1,4 +1,14 @@
 package com.gustavoluz.spendwise_api.dto.user;
 
-public record UserLoginDto (String email, String password){
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record UserLoginDto(
+        @Email(message = "Email must be valid")
+        @NotBlank(message = "Email is required")
+        String email,
+
+        @NotBlank(message = "Password is required")
+        String password
+) {
 }
