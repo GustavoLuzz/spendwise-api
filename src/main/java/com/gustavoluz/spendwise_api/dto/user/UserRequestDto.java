@@ -16,9 +16,14 @@ public record UserRequestDto(
 
 
         @NotBlank(message = "Password is required")
+        @Size(
+                min = 8,
+                max = 72,
+                message = "Password must be between 8 and 72 characters"
+        )
         @Pattern(
-                regexp = "^(?=.*\\d)[A-Za-z\\d]{8,}$",
-                message = "Password must be at least 8 characters and contain at least one number"
+                regexp = "^(?=.*\\p{L})(?=.*\\d)[^\\p{Cntrl}]+$",
+                message = "Password must include at least one letter and one number. Special characters are allowed"
         )
         String password
 ){

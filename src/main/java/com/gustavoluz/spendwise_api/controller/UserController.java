@@ -82,7 +82,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
-            @RequestBody UserLoginDto dto, HttpServletResponse response) {
+            @RequestBody @Valid UserLoginDto dto, HttpServletResponse response) {
 
         User user = userMapper.toEntity(dto);
         String token = userService.authenticate(user, response);
