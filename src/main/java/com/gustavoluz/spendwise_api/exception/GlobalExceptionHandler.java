@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(ExchangeRateUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleExchangeRateUnavailableException(ExchangeRateUnavailableException ex) {
+        return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(org.springframework.web.bind.MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
