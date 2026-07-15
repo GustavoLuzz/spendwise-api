@@ -6,12 +6,11 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record TransactionRequestDto(
-    @NotBlank(message = "Description is required") String description,
+    String description,
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than zero")
     @DecimalMax(value = "10000000", message = "Amount cannot exceed 10000000")
