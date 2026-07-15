@@ -1,5 +1,6 @@
 package com.gustavoluz.spendwise_api.dto.transaction;
 
+import com.gustavoluz.spendwise_api.model.CurrencyCode;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,10 +58,27 @@ class TransactionRequestDtoTest {
         );
     }
 
+    @Test
+    void shouldRejectMissingCurrency() {
+        TransactionRequestDto dto = new TransactionRequestDto(
+                "Test transaction",
+                BigDecimal.TEN,
+                null,
+                UUID.randomUUID(),
+                null
+        );
+
+        assertEquals(
+                "Currency is required",
+                validator.validate(dto).iterator().next().getMessage()
+        );
+    }
+
     private TransactionRequestDto createDto(BigDecimal amount) {
         return new TransactionRequestDto(
                 "Test transaction",
                 amount,
+                CurrencyCode.USD,
                 UUID.randomUUID(),
                 null
         );

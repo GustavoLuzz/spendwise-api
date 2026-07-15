@@ -1,5 +1,6 @@
 package com.gustavoluz.spendwise_api.entity;
 
+import com.gustavoluz.spendwise_api.model.CurrencyCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,10 @@ public class Transaction {
     private UUID id;
 
     private BigDecimal amount;
+
+    @Enumerated(EnumType.STRING)
+    private CurrencyCode currency;
+
     private String description;
 
     @ManyToOne

@@ -1,5 +1,6 @@
 package com.gustavoluz.spendwise_api.dto.transaction;
 
+import com.gustavoluz.spendwise_api.model.CurrencyCode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -16,6 +17,7 @@ public record TransactionRequestDto(
     @DecimalMax(value = "10000000", message = "Amount cannot exceed 10000000")
     @Digits(integer = 8, fraction = 2, message = "Amount must have at most 2 decimal places")
     BigDecimal amount,
+    @NotNull(message = "Currency is required") CurrencyCode currency,
     @NotNull(message = "Category is required") UUID categoryId,
     LocalDate optionalDate
 ) {}
