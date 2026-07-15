@@ -46,7 +46,17 @@ class UserRequestDtoTest {
         UserRequestDto dto = createDto("Gu1!");
 
         assertEquals(
-                "Password must be between 8 and 72 characters",
+                "Password must be between 8 and 32 characters",
+                validator.validate(dto).iterator().next().getMessage()
+        );
+    }
+
+    @Test
+    void shouldRejectPasswordLongerThanThirtyTwoCharacters() {
+        UserRequestDto dto = createDto("a".repeat(32) + "1");
+
+        assertEquals(
+                "Password must be between 8 and 32 characters",
                 validator.validate(dto).iterator().next().getMessage()
         );
     }
