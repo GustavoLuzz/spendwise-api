@@ -80,6 +80,9 @@ public class TransactionService {
         if (transactionDetails.getAmount() != null) {
             transaction.setAmount(transactionDetails.getAmount());
         }
+        if (transactionDetails.getCurrency() != null) {
+            transaction.setCurrency(transactionDetails.getCurrency());
+        }
         if (transactionDetails.getCategory() != null) {
             Category category = categoryService.findById(transactionDetails.getCategory().getId(), request);
             transaction.setCategory(category);
