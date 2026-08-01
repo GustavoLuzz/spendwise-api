@@ -13,6 +13,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "transactions", ignore = true)
+    @Mapping(target = "savingGoals", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     User toEntity(UserRequestDto dto);
 
@@ -21,6 +22,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "transactions", ignore = true)
+    @Mapping(target = "savingGoals", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     User toEntity(UserLoginDto dto);
 }
